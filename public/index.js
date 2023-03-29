@@ -22,6 +22,7 @@ async function main() {
   const averagePriceChartCanvas = document.querySelector(
     "#average-price-chart"
   );
+
   const stockData = await fetch(
     `https://api.twelvedata.com/time_series?symbol=GME,MSFT,DIS,BNTX&interval=1day&apikey=b2b0e11651294ee9a789558a1625b754`
   );
@@ -33,6 +34,10 @@ async function main() {
   // "Destructuring" creates new variables from an object or an array
   const { GME, MSFT, DIS, BNTX } = result;
 
+  // const { GME, MSFT, DIS, BNTX } = mockData;
+
+  //this is an array of stock prices, using the variable name stocks
+  //so stocks is the name of the array
   const stocks = [GME, MSFT, DIS, BNTX];
 
   stocks.forEach((stock) => stock.values.reverse());
@@ -50,16 +55,25 @@ async function main() {
     },
   });
 
+  console.log(stocks[0].values.map((value) => value.high));
+  console.log(Math.max(...stocks[0].values.map((value) => value.high)));
   new Chart(highestPriceChartCanvas.getContext("2d"), {
     type: "bar",
     data: {
       labels: stocks.map((stock) => stock.meta.symbol),
-      datasets: stocks.map((stock) => ({
-        label: stock.meta.symbol,
-        data: stock.values.reverse().map((value) => parseFloat(value.high)),
-        backgroundColor: getColor(stock.meta.symbol),
-        borderColor: getColor(stock.meta.symbol),
-      })),
+      datasets: [
+        {
+          label: "high",
+          data: stocks.map((stock) =>
+            //math.max is a function provided by javascript that finds the highest number in array, our array is highest stock price for each day spaaning 30 days.
+            //... is the spread syntax, takes an array and expands it into individual elements
+            //found math.max on the internet to do the same thing as my own custom written function, information on math.max showed the ...
+            Math.max(...stock.values.map((value) => value.high))
+          ),
+          backgroundColor: stocks.map((stock) => getColor(stock.meta.symbol)),
+          borderColor: stocks.map((stock) => getColor(stock.meta.symbol)),
+        },
+      ],
     },
   });
 }
